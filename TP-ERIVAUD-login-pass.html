@@ -52,6 +52,9 @@
         var IDPass = {};
         IDPass.usr_ID_connect = $("#usr_ID_connect").val();
         IDPass.pwd_connect = $("#pwd_connect").val();
+
+        sessionStorage.setItem("sss_usr_ID",IDPass.usr_ID_connect);
+        sessionStorage.setItem("sss_pwd_connect",IDPass.pwd_connect);
         //var usr_ID_connect = $("#usr_ID_connect").val();
        // var pwd_connect = $("#pwd_connect").val();
         $.ajax({
@@ -62,7 +65,7 @@
             console.log(data);
             $("#resultat2").one(affichageTodolistes(data));
         });
-        return IDPass;
+        //return IDPass;
     }
 
     //function isConnected(IDPass){}
@@ -89,12 +92,12 @@ function affichageTodolistes(data){
             $("#resultat2 .uneListe:last").append("<button class='btnAddElement' id='btnAddElement"+id+"'onclick='askWhatToAdd("+id+")'>Ajouter "+d.name+"</button>");
             id=+1;
         })
-    //console.log("id en dehors : "+id+" et j en dehors n'existes plus");
+    //console.log("id en dehors : "+id+" et j en dehors n'existe plus");
 }
 
 function askWhatToAdd(id){
     $("#btnAddElement"+id).hide();
-    $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button onclick='addElement("+id+")'>Ajouter "+id+"</button></div>");
+    $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button onclick='addElement("+id+")'>Ajouter</button></div>");
 }
  
 function addElement(id){
@@ -106,17 +109,38 @@ function addElement(id){
     while(k>-1){
         maNouvelleListe[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
         k-=1;
-    }console.log(maNouvelleListe);
+    }
+    var monNouvelElement = [];
+    monNouvelElement[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
+    console.log(monNouvelElement);
+    
 
 //// j'en suis là
+//https://stackoverflow.com/questions/8517071/send-json-data-via-post-ajax-and-receive-json-response-from-controller-mvc
+    var IDPass = {};
+    IDPass.usr_ID_connect=sessionStorage.getItem("sss_usr_ID",IDPass.usr_ID_connect);
+    IDPass.pwd_connect=sessionStorage.getItem("sss_pwd_connect",IDPass.pwd_connect);
+
     $.ajax({
             type:"get",
             url:"http://92.222.69.104:80/todo/listes/",
             headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect}
         }).done(function(data){
+            data.todoListes[id].elements=maNouvelleListe;
+            console.log(data);
+
+            /*$.ajax({
+            type:"post",
+            url:"http://92.222.69.104:80/todo/listes/",
+            data:JSON.stringify(maNouvelleListe),
+			headers:{"Content-Type":"application/json"},
+        }).done(function(data){
             console.log(data);
             $("#resultat2").one(affichageTodolistes(data));
+        });*/
         });
+        
+    
 
 }
 
@@ -125,6 +149,8 @@ function addElement(id){
             //$("#formConnect").hide();
             $("#askWhatToAdd").hide();
         });
+
+
                         </script>
     </body>
     

@@ -8,7 +8,8 @@
             <link rel="stylesheet" type="text/css" href="css/Style.css">
             <style type="text/css"></style>
     </head>
-    <body><div class="container">
+    <body>
+        <div class="container">
         <div id="formCreate">
             <input id="usr_ID" placeholder="usr_ID" />
             <input id="pwd" placeholder="pwd" />
@@ -23,10 +24,9 @@
                 <input id="usr_ID_connect" placeholder="usr_ID" />
                 <input id="pwd_connect" placeholder="pwd" />
                 <button onclick="seConnecter()">Se Connecter</button>
-    
             </div>
             <div id="resultat2">
-                
+
             </div>
             
         </div>
@@ -35,18 +35,19 @@
         var usr_ID = $("#usr_ID").val();
         var pwd = $("#pwd").val();
         $.ajax({
-		    url: "http://92.222.69.104/todo/create/"+usr_ID+"/"+pwd
-            
+		    url: "http://92.222.69.104/todo/create/"+usr_ID+"/"+pwd    
 	    }).done(function(data) {
             console.log(data);
             $("#formCreate").hide();
 		$("#resultat1").html("<p>Votre compte a bien été créé, identifiant : "+usr_ID + ", mot de passe : "+pwd+".</p> <div><button id='log_in' onclick='acceedLogIn()'>Log in</button></div>");
 	});
 }
+
 	function acceedLogIn(){
         $("#resultat1").hide();
         $("#formConnect").show();
     }
+
     function seConnecter(){
         var IDPass = {};
         IDPass.usr_ID_connect = $("#usr_ID_connect").val();
@@ -59,10 +60,12 @@
             headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect}
         }).done(function(data){
             console.log(data);
-            affichageTodolistes(data);
+            $("#resultat2").one(affichageTodolistes(data));
         });
         return IDPass;
     }
+
+    //function isConnected(IDPass){}
 
 function affichageTodolistes(data){
     $("#formCreate").hide();
@@ -77,23 +80,44 @@ function affichageTodolistes(data){
             $("#resultat2 .uneListe:last").append("<ul class='ulUneListe' id='ulUneListe"+id+"'></ul>");
             var elementslistes = d.elements;
             //$("#resultat2 .uneListe:last").append(elementslistes['length']);
+            var j=0;
             elementslistes.forEach(function(e){
-                $("#resultat2 .ulUneListe:last").append("<li class='elementliste'>"+e+"</li>");
+                $("#resultat2 .ulUneListe:last").append("<li class='elementliste' id='"+id+"li_"+j+"'>"+e+"</li>");
+            j+=1;
             })
 
             $("#resultat2 .uneListe:last").append("<button class='btnAddElement' id='btnAddElement"+id+"'onclick='askWhatToAdd("+id+")'>Ajouter "+d.name+"</button>");
             id=+1;
         })
+    //console.log("id en dehors : "+id+" et j en dehors n'existes plus");
 }
 
 function askWhatToAdd(id){
     $("#btnAddElement"+id).hide();
-    $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button onclick='addElement("+id+")'>Ajouter</button></div>");
+    $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button onclick='addElement("+id+")'>Ajouter "+id+"</button></div>");
 }
-
+ 
 function addElement(id){
+    var k = $("#ulUneListe"+id+" li").length;
+    //console.log("k : "+k);
     var whatToAdd = $("#whatToAdd").val();
-    $("#resultat2 #ulUneListe"+id+":last").append("<li class='elementliste'>"+whatToAdd+"</li>");
+    $("#resultat2 #ulUneListe"+id+":last").append("<li class='elementliste' id="+id+"_li_"+k+">"+whatToAdd+"</li>");
+    var maNouvelleListe = [];
+    while(k>-1){
+        maNouvelleListe[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
+        k-=1;
+    }console.log(maNouvelleListe);
+
+//// j'en suis là
+    $.ajax({
+            type:"get",
+            url:"http://92.222.69.104:80/todo/listes/",
+            headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect}
+        }).done(function(data){
+            console.log(data);
+            $("#resultat2").one(affichageTodolistes(data));
+        });
+
 }
 
 

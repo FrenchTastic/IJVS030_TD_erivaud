@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
-      $(() => {
+      $(document).ready(function() {
         var username = "jean";
         var password = "jean";
         var listes;
@@ -25,14 +25,14 @@
             if (data && data.todoListes)
             {
               listes = data;
-              $.each(data.todoListes, (index, todoList) => {
+              data.todoListes.forEach(function(todoList, index) {
                 var listContainer = $("<div class='container'></div>");
                 var listTitle = $("<h2></h2>").text(todoList.name);
                 listContainer.append(listTitle);
                 var items;
                 if (todoList.elements && todoList.elements.length > 0) {
                   var itemsContainer = $("<ul></ul>");
-                  $.each(todoList.elements, (index, element) => {
+                  todoList.elements.forEach(function(element, index) {
                     var element = $("<li></li>").text(element);
                     itemsContainer.append(element);
                   });
@@ -57,7 +57,7 @@
               type:"POST",
               url:"http://92.222.69.104:80/todo/listes/",
               data:JSON.stringify(listes),
-              headers:{"login":username, "password":password, "Content-Type":"application/json"}
+              headers:{"Content-Type":"application/json"}
             }).done(function(data){
               clickedButton.closest('div').siblings('ul').append('<li>' + item + '</li>');
               addItemInput.val('');

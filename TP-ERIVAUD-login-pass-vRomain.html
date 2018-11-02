@@ -1,68 +1,67 @@
  <!DOCTYPE html>
 <html>
     <head>
-            <title>Titre de page</title>
-            <meta charset="utf-8">
-            <script src="./jquery-3.3.1.js" type="text/javascript"></script>
-            <link rel="stylesheet" type="text/css" href="css/normalize.css">
-            <link rel="stylesheet" type="text/css" href="css/Style.css">
-            <style type="text/css"></style>
-            <script>
-                $(document).ready(function(){
-                    //$("#formConnect").hide();
-                    $("#askWhatToAdd").hide();
+        <title>Titre de page</title>
+        <meta charset="utf-8">
+        <script src="./jquery-3.3.1.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="css/Style.css">
+        <style type="text/css"></style>
+        <script>
+            $(document).ready(function(){
+                var mesListes = [];
+                $("#askWhatToAdd").hide();
 
-                    $(".uneListe .btnAddElement" ).on( "click", function() {
-                        console.log( $( this ).text() );
-                    });
-            
-                    var mesListes = [];
-            
-                    function createAccount(){
-                        var usr_ID = $("#usr_ID").val();
-                        var pwd = $("#pwd").val();
-                        $.ajax({
-                            url: "http://92.222.69.104/todo/create/"+usr_ID+"/"+pwd    
-                        }).done(function(data) {
-                            console.log(data);
-                            $("#formCreate").hide();
-                        $("#resultat1").html("<p>Votre compte a bien été créé, identifiant : "+usr_ID + ", mot de passe : "+pwd+".</p> <div><button id='log_in' onclick='acceedLogIn()'>Log in</button></div>");
-                        });
-                    }
-                
-                    function acceedLogIn(){
-                        $("#resultat1").hide();
-                        $("#formConnect").show();
-                    }
-
-                    $(".button-connect").click(() => {
-                        var IDPass = {};
-                        IDPass.usr_ID_connect = $("#usr_ID_connect").val();
-                        IDPass.pwd_connect = $("#pwd_connect").val();
-                
-                        sessionStorage.setItem("sss_usr_ID",IDPass.usr_ID_connect);
-                        sessionStorage.setItem("sss_pwd_connect",IDPass.pwd_connect);
-                        //var usr_ID_connect = $("#usr_ID_connect").val();
-                       // var pwd_connect = $("#pwd_connect").val();
-                        $.ajax({
-                            type:"get",
-                            url:"http://92.222.69.104:80/todo/listes/",
-                            headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect}
-                        }).done(function(data){
-                            console.log(data);
-                            if (data != null && data.todoListes) {
-                                mesListes = data.todoListes;
-                            }
-                            $("#resultat2").one(affichageTodolistes(data));
-                        });
-                    })
-                
-                    //function isConnected(IDPass){}
-                
-                    function affichageTodolistes(data){
+                $("[data-action='create-account']").click(() => {
+                    var usr_ID = $("#usr_ID").val();
+                    var pwd = $("#pwd").val();
+                    $.ajax({
+                        url: "http://92.222.69.104/todo/create/"+usr_ID+"/"+pwd    
+                    }).done(function(data) {
+                        console.log(data);
                         $("#formCreate").hide();
-                        $("#formConnect").hide();
-                        // var listes = data.todoListes;
+                        $("#resultat1").html("<p>Votre compte a bien été créé, identifiant : "+usr_ID + ", mot de passe : "+pwd+".</p> <div><button id='log_in' onclick='acceedLogIn()'>Log in</button></div>");
+                    });
+                });
+            
+                function acceedLogIn(){
+                    $("#resultat1").hide();
+                    $("#formConnect").show();
+                }
+
+                $(".button-connect").click(() => {
+                    var IDPass = {};
+                    IDPass.usr_ID_connect = $("#usr_ID_connect").val();
+                    IDPass.pwd_connect = $("#pwd_connect").val();
+            
+                    sessionStorage.setItem("sss_usr_ID",IDPass.usr_ID_connect);
+                    sessionStorage.setItem("sss_pwd_connect",IDPass.pwd_connect);
+                    $.ajax({
+                        type:"get",
+                        url:"http://92.222.69.104:80/todo/listes/",
+                        headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect}
+                    }).done(function(data){
+                        console.log(data);
+                        if (data != null && data.todoListes) {
+                            mesListes = data.todoListes;
+                            $("#resultat2").one(affichageTodolistes(data));
+                        }
+                    });
+                });
+
+                $(document).on( "click", ".btnAddElement", function() {
+                    var listeId = $(this).data("list");
+                    $("#btnAddElement"+listeId).hide();
+                    $("#resultat2 #"+listeId).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button class='add-item' data-list='"+ listeId +"' >Ajouter</button></div>");
+                });
+            
+                function affichageTodolistes(data){
+                    $("#formCreate").hide();
+                    $("#formConnect").hide();
+                    var listes;
+                    // Si l'on a pas d'items dans la liste on essaie pas de l'afficher
+                    if (data.todoListes) {
+                        listes = data.todoListes;
                         // $("#resultat2").append(listes['length']);
                         var id=0;    
                         listes.forEach(function(d){
@@ -81,73 +80,58 @@
                             $("#resultat2 .uneListe:last").append("<button class='btnAddElement' id='btnAddElement"+id+"'  data-list='"+id+"' >Ajouter "+d.name+"</button>");
                             id=+1;
                         });
-                        //console.log("id en dehors : "+id+" et j en dehors n'existe plus");
                     }
+                    //console.log("id en dehors : "+id+" et j en dehors n'existe plus");
+                }
 
-                        
-                        
-                        // $(".uneListe").on("click", ".btnAddElement", () => {
-                        //     $("#btnAddElement"+id).hide();
-                        //     $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button class='add-item' onclick='addElement("+id+")'>Ajouter</button></div>");
-                        // });
+                $(document).on("click", ".add-item",() => {
+                    var id = $(".add-item").data('list');
+                    var addItemInput = $(".add-item").prev("input");
+                    var listTodo =  mesListes[id];
+                    listTodo.elements.push(addItemInput.val());
+                    
+                    
+                    var k = $("#ulUneListe"+id+" li").length;
+                    //console.log("k : "+k);
+                    var whatToAdd = $("#whatToAdd").val();
+                    $("#resultat2 #ulUneListe"+id+":last").append("<li class='elementliste' id="+id+"_li_"+k+">"+whatToAdd+"</li>");
+                    var maNouvelleListe = [];
+                    while(k>-1){
+                        maNouvelleListe[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
+                        k-=1;
+                    }
+                    var monNouvelElement = [];
+                    monNouvelElement[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
+                    console.log(monNouvelElement);
+                    
+                    var IDPass = {};
+                    IDPass.usr_ID_connect=sessionStorage.getItem("sss_usr_ID",IDPass.usr_ID_connect);
+                    IDPass.pwd_connect=sessionStorage.getItem("sss_pwd_connect",IDPass.pwd_connect);
+                    
 
-                        function askWhatToAdd(id){
-                            $("#btnAddElement"+id).hide();
-                            $("#resultat2 #"+id).append("<div id='askWhatToAdd'><input id='whatToAdd' placeholder='Votre ajout'/><button class='add-item' onclick='addElement("+id+")'>Ajouter</button></div>");
-                        }
+                    var data = { utilisateur: IDPass.usr_ID_connect, password: IDPass.pwd_connect, todoListes: [listTodo] };
 
-                        $(".add-item").click(() => {
-                            var listTodo =  mesListes[id];
-                            var k = $("#ulUneListe"+id+" li").length;
-                            //console.log("k : "+k);
-                            var whatToAdd = $("#whatToAdd").val();
-                            $("#resultat2 #ulUneListe"+id+":last").append("<li class='elementliste' id="+id+"_li_"+k+">"+whatToAdd+"</li>");
-                            var maNouvelleListe = [];
-                            while(k>-1){
-                                maNouvelleListe[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
-                                k-=1;
-                            }
-                            var monNouvelElement = [];
-                            monNouvelElement[k]=$("#resultat2 #ulUneListe"+id+" .elementliste:eq("+k+")").text();
-                            console.log(monNouvelElement);
-                            
-                        
-                        //// j'en suis là
-                        //https://stackoverflow.com/questions/8517071/send-json-data-via-post-ajax-and-receive-json-response-from-controller-mvc
-                            var IDPass = {};
-                            IDPass.usr_ID_connect=sessionStorage.getItem("sss_usr_ID",IDPass.usr_ID_connect);
-                            IDPass.pwd_connect=sessionStorage.getItem("sss_pwd_connect",IDPass.pwd_connect);
-                            var data = {};
-                            data.utilisateur = IDPass.usr_ID_connect;
-                            data.password = IDPass.pwd_connect;
-                            var liste = {};
-                            liste.name = "Ma Liste";
-                            liste.elements = ["Premier item", "Tomate"];
-                            data.todoListes = [liste];
-                        
-                            $.ajax({
-                                type:"POST",
-                                //dataType: 'json',
-                                url:"http://92.222.69.104:80/todo/listes/",
-                                data:JSON.stringify(data),
-                                headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect, "Content-Type":"application/json"}
-                                }).done(function(data){
-                                data.todoListes[id].elements=maNouvelleListe;
-                                console.log(data);
-                            });                            
-                        });
-                
-                    });
-                
-                
-                                        </script>
+                    $.ajax({
+                        type:"POST",
+                        //dataType: 'json',
+                        url:"http://92.222.69.104:80/todo/listes/",
+                        data:JSON.stringify(data),
+                        headers:{"login":IDPass.usr_ID_connect, "password":IDPass.pwd_connect, "Content-Type":"application/json"}
+                    }).done(function(data){
+                        // data.todoListes[id].elements=maNouvelleListe;
+                        addItemInput.val('');
+                    });                            
+                });
+            
+            });   
+        </script>
     </head>
     <body>
         <div class="container">
         <div id="formCreate">
             <input id="usr_ID" placeholder="usr_ID" />
             <input id="pwd" placeholder="pwd" />
-            <button onclick="createAccount()">Créer compte</button>
+            <button data-action="create-account">Créer compte</button>
 
         </div>
         <div id="resultat1">
